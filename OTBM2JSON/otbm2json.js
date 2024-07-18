@@ -54,6 +54,8 @@ function writeOTBM(__OUTFILE__, data) {
         return node.content;
       case HEADERS.OTBM_MAP_DATA:
         return node.features;
+      case HEADERS.OTBM_TILE_ZONE:
+        return node.zones;
       default:
         return node.nodes;
         break;
@@ -139,6 +141,10 @@ function writeOTBM(__OUTFILE__, data) {
         buffer.writeUInt16LE(node.x, 7 + node.name.length);
         buffer.writeUInt16LE(node.y, 7 + node.name.length + 2);
         buffer.writeUInt8(node.z, 7 + node.name.length + 4);
+        break;
+      case HEADERS.OTBM_TILE_ZONE:
+        buffer = Buffer.alloc(1); 
+        buffer.writeUInt8(HEADERS.OTBM_TILE_ZONE, 0);
         break;
       default:
         throw("Could not write node. Unknown node type: " + node.type); 
@@ -382,6 +388,12 @@ function readOTBM(__INFILE__) {
         this.y = data.readUInt16LE(9 + this.name.length);
         this.z = data.readUInt8(11 + this.name.length);
         break;
+		
+      // Parse HEADERS.OTBM_TILE_ZONE structure
+      case HEADERS.OTBM_TILE_ZONE:
+        this.type = HEADERS.OTBM_TILE_ZONE;
+        break;
+		
     }
 
     // Set node children
@@ -444,6 +456,9 @@ function readOTBM(__INFILE__) {
         break;
       case HEADERS.OTBM_MAP_DATA:
         this.features = children;
+        break;
+      case HEADERS.OTBM_TILE_ZONE:
+        this.zones = children;
         break;
       default:
         this.nodes = children;
